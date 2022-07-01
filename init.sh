@@ -108,8 +108,8 @@ function __init_module() {
 
   GO_VERSION="$1"
   REPO="$2"
-  docker run -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine go mod init $REPO
-  docker run -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine go mod tidy
+  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine go mod init $REPO
+  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine go mod tidy
 }
 
 function __init_cobra() {
@@ -119,7 +119,7 @@ function __init_cobra() {
   fi
 
   GO_VERSION="$1"
-  docker run -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine sh -c "go install github.com/spf13/cobra-cli@latest && cobra-cli init ."
+  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine sh -c "go install github.com/spf13/cobra-cli@latest && cobra-cli init ."
 }
 
 function __init() {
