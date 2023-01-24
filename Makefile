@@ -86,7 +86,7 @@ dbhr: ## Build the docker image to the hot-reload target
 
 .PHONY: exec
 exec: ## Exec into the hot recompilation container
-	$(DOCKER_COMPOSE) exec compiler sh
+	$(DOCKER_COMPOSE) exec compiler bash
 
 .PHONY: dc
 dc: ## Show the docker compose command to interact with the containers
@@ -96,7 +96,7 @@ dc: ## Show the docker compose command to interact with the containers
 .PHONY: build
 build: ## Build the binary (should be used within the docker image)
 	go mod tidy
-	go build $(LDFLAGS) -o /go/bin/$(PROJECT_NAME) main.go
+	go build $(LDFLAGS) -o /go/bin/$(PROJECT_NAME) cmd/$(PROJECT_NAME)/main.go
 
 .PHONY: make-executable
 make-executable: ## Makes the built tool executable

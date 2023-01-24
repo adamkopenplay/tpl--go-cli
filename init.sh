@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEFAULT_GIT_HOST="github.com"
-DEFAULT_GO_VERSION="1.18"
+DEFAULT_GO_VERSION="1.19"
 DEFAULT_REGISTRY="docker.io"
 NIL_VALUE="nil"
 
@@ -108,18 +108,10 @@ function __init_module() {
 
   GO_VERSION="$1"
   REPO="$2"
-  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine go mod init $REPO
-  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine go mod tidy
-}
-
-function __init_cobra() {
-  if [ "$#" != "1" ]; then
-    __errlns "__init_module expects 1 arg: 1=go version"
-    exit 1
-  fi
-
-  GO_VERSION="$1"
-  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION-alpine sh -c "go install github.com/spf13/cobra-cli@latest && cobra-cli init ."
+  mkdir -p $ROOT_DIR/cmd/$NAME
+  mv main.go $ROOT_DIR/cmd/$NAME/main.go
+  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION go mod init $REPO
+  docker run --rm -it -w "/srv" -v "$ROOT_DIR:/srv" golang:$GO_VERSION go mod tidy
 }
 
 function __init() {
@@ -130,7 +122,6 @@ function __init() {
   GO_VERSION=$DEFAULT_GO_VERSION
   GIT_HOST=$DEFAULT_GIT_HOST
   INIT_MODULE="true"
-  INIT_COBRA="true"
 
   if ! __opt_exists "--org" || ! __opt_exists "--name"; then
     __errlns "--org=* and --name=* must be set"
@@ -153,14 +144,9 @@ function __init() {
     INIT_MODULE="false"
   fi
 
-    if __opt_exists "--no-init" || __opt_exists "--no-cobra"; then
-    INIT_COBRA="false"
-  fi
-
   __infolns "      Using repo:  $GIT_HOST/$ORG/$NAME"
   __infolns "Using Go version:  $GO_VERSION"
   __infolns "Will init module:  $INIT_MODULE"
-  __infolns " Will init cobra:  $INIT_COBRA" 
 
   echo ""
 
@@ -200,12 +186,6 @@ function __init() {
 
   __init_module "$GO_VERSION" "$GIT_HOST/$ORG/$NAME"
 
-  if [ "$INIT_COBRA" != "true" ]; then
-    __end_message
-    exit 0
-  fi
-
-  __init_cobra "$GO_VERSION"
   __end_message
 }
 

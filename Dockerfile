@@ -1,4 +1,4 @@
-FROM golang:<< go_version >>-alpine as build
+FROM golang:<< go_version >> as build
 
 # The `make build` directive uses this variable
 # They will be baked into the built tool 
@@ -6,10 +6,10 @@ ARG BUILD_VERSION=docker-unknown
 
 RUN mkdir /go/src/app-build
 
+COPY cmd /go/src/app-build/cmd
+
 COPY go.mod /go/src/app-build/go.mod
 COPY go.sum /go/src/app-build/go.sum
-
-COPY main.go /go/src/app-build/main.go
 
 COPY Makefile /go/src/app-build/Makefile
 
