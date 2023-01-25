@@ -19,7 +19,6 @@ WORKDIR /go/src/app-build/
 # rest of the time
 ENV CGO_ENABLED 0
 
-RUN apk add make
 RUN make build make-executable
 
 # --- HOT-RELOAD --- #
