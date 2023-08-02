@@ -1,4 +1,4 @@
-FROM golang:<< go_version >> as build
+FROM golang:1.19 as build
 
 # The `make build` directive uses this variable
 # They will be baked into the built tool 
@@ -40,7 +40,14 @@ ENTRYPOINT /hot-reload.sh
 # --- FINAL --- #
 FROM alpine:latest as final
 
-COPY --from=build /go/bin/<< name >> /usr/local/bin/<< name >>
+ARG TARGETARCH
+
+COPY ./dist /tmp/dist
+
+RUN DIST_DIR=/tmp/dist/<< name >>_linux_${TARGETARCH}; if [ "$TARGETARCH" == "amd64" ]; then DIST_DIR="${DIST_DIR}_v1"; fi; mv $DIST_DIR/<< name >> /usr/local/bin/<< name >>
+
 RUN chmod +x /usr/local/bin/<< name >>
+
+RUN rm -rf /tmp/dist
 
 ENTRYPOINT ["/usr/local/bin/<< name >>"]

@@ -1,0 +1,26 @@
+name: Build PR
+run-name: "Build PR ${{ github.event.pull_request.number }}"
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build_draft:
+    name: "Build draft"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: "Create draft release"
+        uses: ./.github/actions/release
+        with:
+          type: draft
+          version: rc-pr${{github.event.pull_request.number}}-${{github.event.pull_request.head.sha}}
+          docker_username: ${{ secrets.DOCKERHUB_USER }}
+          docker_password: ${{ secrets.DOCKERHUB_TOKEN }} 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
