@@ -9,18 +9,6 @@ ifdef BUILD_VERSION
 	LDFLAGS_VAL=-X '$(PROJECT_GIT_URL)/Version=$(BUILD_VERSION)'
 endif
 
-ifndef REGISTRY
-	REGISTRY=<< docker_registry >>
-endif
-
-ifndef IMAGE
-	IMAGE=<< name >>
-endif
-
-ifndef VERSION
-	VERSION=local
-endif
-
 ifndef ARGS
 	ARGS="./..."
 endif
@@ -60,29 +48,6 @@ restart: ## Restart the got recompilation container
 .PHONY: tail
 tail: ## Tail logs from the recompilation container
 	$(DOCKER_COMPOSE) logs -f compiler
-
-.PHONY: buildx
-buildx: ## Builds the final container for all platforms, and pushes to ECR
-	docker buildx build \
-		--platform $(BUILDX_PLATFORMS) \
-		-t $(REGISTRY)/$(IMAGE):$(BUILD_VERSION) \
-		--build-arg BUILD_VERSION=$(BUILD_VERSION) \
-		--target final \
-		-o type=registry \
-		.
-
-.PHONY: docker-build
-docker-build: ## Build the docker image to the specified target
-	test -n $(TARGET) # TARGET must be set
-	docker build --no-cache --build-arg BUILD_VERSION=local --target $(TARGET) -t ${PROJECT_NAME}-$(TARGET)-local:latest .
-
-.PHONY: dbf
-dbf: ## Build the docker image to the final target
-	TARGET=final $(MAKE) docker-build
-
-.PHONY: dbhr
-dbhr: ## Build the docker image to the hot-reload target
-	TARGET=hot-reload $(MAKE) docker-build
 
 .PHONY: exec
 exec: ## Exec into the hot recompilation container

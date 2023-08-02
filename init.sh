@@ -1,9 +1,9 @@
 #!/bin/bash
 
 DEFAULT_GIT_HOST="github.com"
-DEFAULT_GO_VERSION="1.19"
-DEFAULT_REGISTRY="docker.io"
+DEFAULT_GO_VERSION="1.20"
 NIL_VALUE="nil"
+DEFAULT_REGISTRY=docker.io
 
 ROOT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -97,7 +97,7 @@ function __replace_vars() {
     exit 1
   fi
 
-  sed -i '' -e "s/<< $KEY >>/$VAL/g" "$FILE"
+  sed -i '' -e "s|<< $KEY >>|$VAL|g" "$FILE"
 }
 
 function __init_module() {
@@ -116,17 +116,18 @@ function __init_module() {
 
 function __init() {
   
-  ORG=`__opt_by_key "--org"`
-  NAME=`__opt_by_key "--name"`
-  REGISTRY=$DEFAULT_REGISTRY
   GO_VERSION=$DEFAULT_GO_VERSION
+  REGISTRY=$DEFAULT_REGISTRY
   GIT_HOST=$DEFAULT_GIT_HOST
   INIT_MODULE="true"
 
-  if ! __opt_exists "--org" || ! __opt_exists "--name"; then
-    __errlns "--org=* and --name=* must be set"
+  if ! __opt_exists "--org" || ! __opt_exists "--name" || ! __opt_exists "--image"; then
+    __errlns "--org=*, --name=*, and --image=* must be set"
     exit 1
   fi
+  ORG=`__opt_by_key "--org"`
+  NAME=`__opt_by_key "--name"`
+  IMAGE=`__opt_by_key "--image"`
 
   if __opt_exists "--go-version"; then
     GO_VERSION=`__opt_by_key "--go-version"`
@@ -144,9 +145,11 @@ function __init() {
     INIT_MODULE="false"
   fi
 
-  __infolns "      Using repo:  $GIT_HOST/$ORG/$NAME"
-  __infolns "Using Go version:  $GO_VERSION"
-  __infolns "Will init module:  $INIT_MODULE"
+  __infolns "           Using repo:  $GIT_HOST/$ORG/$NAME"
+  __infolns "   Using docker image:  $IMAGE"
+  __infolns "Using docker registry:  $REGISTRY"
+  __infolns "     Using Go version:  $GO_VERSION"
+  __infolns "     Will init module:  $INIT_MODULE"
 
   echo ""
 
@@ -172,10 +175,16 @@ function __init() {
   __replace_vars "$ROOT_DIR/Makefile" name "$NAME"
   __replace_vars "$ROOT_DIR/Makefile" git_host "$GIT_HOST"
   __replace_vars "$ROOT_DIR/Makefile" org "$ORG"
-  __replace_vars "$ROOT_DIR/Makefile" docker_registry "$REGISTRY"
 
   __replace_vars "$ROOT_DIR/Dockerfile" name "$NAME"
   __replace_vars "$ROOT_DIR/Dockerfile" go_version "$GO_VERSION"
+
+  __replace_vars "$ROOT_DIR/.github/actions/release/action.yml" go_version "$GO_VERSION"
+  __replace_vars "$ROOT_DIR/.github/actions/release/action.yml" image "$IMAGE"
+  __replace_vars "$ROOT_DIR/.github/actions/release/action.yml" registry "$REGISTRY"
+  __replace_vars "$ROOT_DIR/.github/workflows/test.yml" go_version "$GO_VERSION"
+
+  __replace_vars "$ROOT_DIR/.goreleaser.yaml" name "$NAME"
 
   __replace_vars "$ROOT_DIR/main.go" name "$NAME"
 

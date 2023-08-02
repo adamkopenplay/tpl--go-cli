@@ -1,0 +1,57 @@
+name: Publish Release
+
+inputs:
+  version:
+    type: string
+    description: "The version we're building."
+    required: true
+  type:
+    type: string
+    description: "The type of release we're creating."
+  docker_username:
+    type: string
+    description: "The username of the docker repository."
+  docker_password:
+    type: string
+    description: "The password for the docker repository."
+  github_token:
+    type: string
+    description: "The github token."
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v4
+        with:
+          go-version: '<< go_version >>'
+    - # Add support for more platforms with QEMU (optional)
+      # https://github.com/docker/setup-qemu-action
+      name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        registry: << registry >>
+        username: ${{ inputs.docker_username }}
+        password: ${{ inputs.docker_password }}
+    - name: Run GoReleaser
+      id: gorelease_for_draft
+      uses: goreleaser/goreleaser-action@v4
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release ${{ inputs.type == 'draft' && '--snapshot' || '' }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        push: true
+        target: final
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        tags: << registry >>/<< image >>:${{ inputs.version }}
