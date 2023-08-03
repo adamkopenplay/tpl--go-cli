@@ -186,6 +186,10 @@ function __init() {
 
   __replace_vars "$ROOT_DIR/.goreleaser.yaml" name "$NAME"
 
+  __replace_vars "$ROOT_DIR/.mockery.yaml" name "$NAME"
+  __replace_vars "$ROOT_DIR/.mockery.yaml" git_host "$GIT_HOST"
+  __replace_vars "$ROOT_DIR/.mockery.yaml" org "$ORG"
+
   __replace_vars "$ROOT_DIR/main.go" name "$NAME"
 
   if [ "$INIT_MODULE" != "true" ]; then

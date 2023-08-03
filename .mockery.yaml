@@ -1,0 +1,24 @@
+quiet: False
+keeptree: True
+disable-version-string: True
+with-expecter: True
+dir: "test/mocks/gen/{{.InterfaceDirRelative}}"
+mockname: "{{.InterfaceNameCamel}}"
+filename: "{{.MockName}}.go"
+outpkg: mocks
+packages:
+  # Example setup so that mockery will auto-discover everything in internal pkg
+  # and generate mocks in the tests directory.
+  #
+  # << git_host >>/<< org >>/<< name >>/internal:
+  #   config:
+  #     all: true
+  #     dir: 'test/mocks/gen/{{ replaceAll .InterfaceDirRelative  "internal" "_internal" }}'
+  #     recursive: true
+  #     with-expecter: true
+
+  # << git_host >>/<< org >>/<< name >>/pkg:
+  #   config:
+  #     all: true
+  #     recursive: true
+  #     with-expecter: true
