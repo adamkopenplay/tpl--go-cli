@@ -71,13 +71,9 @@ make-executable: ## Makes the built tool executable
 fmt: ## Format code using go fmt ./...
 	go fmt ./...
 
-# --- Example of setting up mocks with vektra mockery
-# .PHONY: gen-internal-mypkg-mocks
-# gen-internal-mypkg-mocks:
-# 	mockery $(MOCKS_GEN_ARGS) --output $(MOCKS_DIR)/mypkg --outpkg mypkgmocks --dir ./internal/mypkg --name MyInterface
-
-# .PHONY: gen-mocks 
-# gen-mocks: gen-internal-mypkg-mocks ## Generates mocks for testing purposes 
+.PHONY: gen-mocks 
+gen-mocks:
+	mockery
 
 .PHONY: test
 test: ## Runs the tests for the app code
