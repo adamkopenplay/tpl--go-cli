@@ -1,2 +1,12 @@
 # IDEs
 .vscode
+
+# local dev
+.dockerenv
+
+# Tests
+test/coverage.html
+test/coverage.out
+
+# goreleaser
+dist

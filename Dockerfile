@@ -1,4 +1,4 @@
-FROM golang:1.19 as build
+FROM golang:<< go_version >> as build
 
 # The `make build` directive uses this variable
 # They will be baked into the built tool 
